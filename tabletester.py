@@ -1,4 +1,3 @@
-from nuclia import sdk
 from datetime import datetime
 from enum import Enum
 import requests
@@ -26,12 +25,6 @@ def print_time(line):
         current_time = now.strftime("%H:%M:%S")
         print(f'.{current_time} | {line}')
 
-
-sdk.NucliaAuth().kb(url=os.getenv('KB_URL'), token=os.getenv('API_KEY'), interactive=False)
-kb = sdk.NucliaKB()
-
-kb = sdk.NucliaKB()
-# resources = kb.list()
 
 class Model(Enum):
     NO_GENERATION_MODE = "generative-multilingual-2023"
@@ -116,8 +109,6 @@ models_answers = [headers]
 def run_search_for_all_models(queries, prompt = "", logs = True, ):
     logger(logs)
     print_time(f'\n-------------- Started searching for {len(queries)} diferent queries ----------------')
-    # Switching from SDK to ditect /chat call
-    # search = sdk.NucliaSearch()
 
     for model in models:
         set_model(model)       
@@ -125,7 +116,6 @@ def run_search_for_all_models(queries, prompt = "", logs = True, ):
         for query in queries:
             print_time(f'{model} Q: {query}')
             # ans = f'Question: {q}'
-            # ans = search.chat(query=query)
             ans = search(query, prompt)
             answers.append(ans)
             
@@ -145,7 +135,6 @@ def export_to_csv(models_answers):
     
 
 # ----------------------------
-
 
 # models_answers = run_search_for_all_models(questions, "", False)
 models_answers = run_search_for_all_models(questions)
