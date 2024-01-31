@@ -17,11 +17,15 @@ load_keys()
 NUCLIA_MANAGEMENT_API = "https://nuclia.cloud/api/v1"
 NUCLIA_KB_API = "https://europe-1.nuclia.cloud/api/v1"
 
+def logger(logger = True):
+    global show_log
+    show_log = logger
 
 def print_time(line):
-    now = datetime.now()
-    current_time = now.strftime("%H:%M:%S")
-    print(f'\n--- T:{current_time} | {line}')
+    if show_log is True:
+        now = datetime.now()
+        current_time = now.strftime("%H:%M:%S")
+        print(f'.{current_time} | {line}')
 
 
 sdk.NucliaAuth().kb(url=os.getenv('KB_URL'), token=os.getenv('API_KEY'), interactive=False)
@@ -57,64 +61,74 @@ def set_model(model: Model):
         headers={"Authorization": f"Bearer {os.getenv('GLOBAL_AUTH_TOKEN')}"}
     )
     assert response.status_code == 204
-    print(f'Generative model PATCHed from {current_model} ---> {model}')
-    print_time(model)
-
-
+    print_time(f'| | | | | | | | | | Generative model PATCHed from {current_model} ---> {model}')
 
 
 questions = [
-            # "What is a vector", 
-            # "Who is Eudald", 
-            # "What is a vector database in a shakespearean tone",
-            # "What about a prince",
-            # "Who is bella",
-            # "What is a vector database in 200 characters",÷
-            "What is a vector database in one parragraph"
+            "What is a vector", 
+            "Who is Eudald", 
+            "What is a vector database in a shakespearean tone",
+            "What about a prince",
+            "Who is bella",
+            "What is a vector database in 200 characters",
+            "What is a vector databasein 2 paragraphs"
           ]
 
 models = [
-          # "generative-multilingual-2023",
-          # "chatgpt-azure-3",
-          # "chatgpt-azure",
+        #   "generative-multilingual-2023",
+          "chatgpt-azure-3",
+          "chatgpt-azure",
           "anthropic",
           "gemini-pro"
           ]
 
-models2 = [
-            "NO_GENERATION_MODE",
-            "Chat_GPT_3",
-            "Chat_GPT_4",
-            "ANTHROPIC_CLAUDE",
-            "GOOGLE_GEMINI_PRO"
-          ]
+# models2 = [
+#             "NO_GENERATION_MODE",
+#             "Chat_GPT_3",
+#             "Chat_GPT_4",
+#             "ANTHROPIC_CLAUDE",
+#             "GOOGLE_GEMINI_PRO"
+#           ]
 
-def run_search_and_log(queries):
+
+headers = ["Models"]
+headers.extend(questions)
+models_answers = [headers]
+
+
+def run_search_for_all_models(queries, logs = True):
+    logger(logs)
+    print_time(f'\n-------------- Started searching for {len(queries)} diferent queries ----------------')
     search = sdk.NucliaSearch()
-    answers = []
-    for model in models:
-        set_model(model)
-        
-        for q in queries:
-            print_time(q)
-            answer = search.chat(query=q)
-            answers.append(answer)
-            # print_time(q, "-------", answer)
-
-
-    # with open('model_tester.csv', 'w', newline='') as file:
-    #     writer = csv.writer(file)
-        
-    #     writer.writerow(queries)
-    #     writer.writerow(answers)
     
+    for model in models:
+        set_model(model)       
+        answers = [model]
+        for q in queries:
+            print_time(f'{model} Q: {q}')
+            # ans = f'Question: {q}'
+            ans = search.chat(query=q)
+            answers.append(ans)
+            
+        models_answers.append(answers)
+
+    return models_answers
 
 
+def export_to_csv(models_answers):
+    with open('model_tester.csv', 'w', newline='') as file:
+        print_time(f'\n-------------- Started writing process for {len(models_answers)} models ----------------')
+        writer = csv.writer(file)
+        
+        for answer_row in models_answers:
+            print_time(f'Writing {answer_row[0]} row')
+            writer.writerow(answer_row)
+    
 
 # ----------------------------
 
-# settings = kb.get_configuration()
-# print("------------------\n", settings, "\n-------------------")
 
+# models_answers = run_search_for_all_models(questions, False)
+models_answers = run_search_for_all_models(questions)
+export_to_csv(models_answers)
 
-run_search_and_log(questions)
