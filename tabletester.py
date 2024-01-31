@@ -2,7 +2,6 @@ from nuclia import sdk
 from datetime import datetime
 from enum import Enum
 import requests
-import json
 import csv
 import os
 from dotenv import load_dotenv
@@ -63,6 +62,24 @@ def set_model(model: Model):
     assert response.status_code == 204
     print_time(f'| | | | | | | | | | Generative model PATCHed from {current_model} ---> {model}')
 
+def search(query, prompt = ""):
+    url = f"{NUCLIA_KB_API}/kb/{os.getenv('KB_ID')}/chat"
+    response = requests.post(
+        url, 
+        json={
+            "query": query, 
+            "prompt": prompt
+        },
+        headers={
+            "Authorization": f"Bearer {os.getenv('GLOBAL_AUTH_TOKEN')}",
+            "x-synchronous": "true"
+            }
+    )
+
+    assert response.status_code == 200
+    print_time(f'answering...')
+    return response.json()["answer"]
+   
 
 questions = [
             "What is a vector", 
@@ -96,18 +113,20 @@ headers.extend(questions)
 models_answers = [headers]
 
 
-def run_search_for_all_models(queries, logs = True):
+def run_search_for_all_models(queries, prompt = "", logs = True, ):
     logger(logs)
     print_time(f'\n-------------- Started searching for {len(queries)} diferent queries ----------------')
-    search = sdk.NucliaSearch()
-    
+    # Switching from SDK to ditect /chat call
+    # search = sdk.NucliaSearch()
+
     for model in models:
         set_model(model)       
         answers = [model]
-        for q in queries:
-            print_time(f'{model} Q: {q}')
+        for query in queries:
+            print_time(f'{model} Q: {query}')
             # ans = f'Question: {q}'
-            ans = search.chat(query=q)
+            # ans = search.chat(query=query)
+            ans = search(query, prompt)
             answers.append(ans)
             
         models_answers.append(answers)
@@ -128,7 +147,10 @@ def export_to_csv(models_answers):
 # ----------------------------
 
 
-# models_answers = run_search_for_all_models(questions, False)
+# models_answers = run_search_for_all_models(questions, "", False)
 models_answers = run_search_for_all_models(questions)
 export_to_csv(models_answers)
+
+# -------------------- exploring prompting
+
 
