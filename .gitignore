@@ -1,5 +1,6 @@
 .env
-model_tester.csv
-model_tester1.csv
+Prompt.csv
+Summmary.csv
 
 .DS_Store
+sample.json

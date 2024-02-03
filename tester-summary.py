@@ -15,35 +15,6 @@ def print_time(line):
         current_time = now.strftime("%H:%M:%S")
         print(f'.{current_time} | {line}')
 
-# def summarize(prompt = ""):
-#     print_time(f'summarizing...')
-#     url = f'{NUCLIA_KB_API}/kb/{os.getenv("KB_ID")}/summarize'
-#     response = requests.post(
-#         url, 
-#         json={
-#             "resources": ["4df19a1be2a28f11dca2910fa60b3e00"]
-#             # "user_prompt": "answer in french",
-#         },
-#         headers={
-#             "Authorization": f'Bearer {os.getenv("GLOBAL_AUTH_TOKEN")}',
-#             # "x-synchronous": "true"
-#             }
-#     )
-#     # print(response.json())
-#     assert response.status_code == 200
-#     print_time(f'summarized......')
-#     # return response.json()["answer"]
-
-questions = [
-            # "What is a vector", 
-            # "What is and emmbeding",
-            # "Who is Eudald", 
-            # "What is a vector database in a shakespearean tone",
-            # "What about a prince",
-            "Who is bella",
-            # "What is a vector database in 200 characters",
-            "What is a vector databas?"
-            ]
 
 models =    [
             # "generative-multilingual-2023",
@@ -54,80 +25,81 @@ models =    [
             ]
 
 prompts =   [
-            # "Give a detailed answer to this question in a list format. ",
-            # "Answer this question always in French",
+            "Give a detailed answer to this question in a list format. "
+            # "Answer this question always in French.",
             # "Answer in bulletpoints"
             # "Give a detailed answer to this \{question\} in a list format.  If you do not find an answer in this context: \{context\}, say that you don't have enough data.",
             # "Answer this \{question\} in a concise way",
             # "Answer this \{question\} always in French"
             ]
 
+resources = [
+            "4df19a1be2a28f11dca2910fa60b3e00", 
+            "03faa53a4fa1b7c84cef3499018ae084"
+            ]
 
-headers = ["Questions"]
+
+headers = ["Models"]
 if len(prompts) > 0:
-    headers_promps = ["Prompts"]
-    for question in questions:
+    head_model_prompt = ["Model/Prompt"]
+    for model in models:
         for prompt in prompts:
-            headers.append(question)
-            headers_promps.append(prompt)
-    models_answers = [headers , headers_promps]
+            head_model_prompt.append(f'Model:{model}\n\nP:{prompt}')
+    models_summaries = [head_model_prompt]
 else:    
-    headers.extend(questions)
-    models_answers = [headers]
+    headers.extend(models)
+    models_summaries = [headers]
 
 
 
-def run_search_for_all_models(queries, prompts = [], logs = True, ):
+def run_summarize_with_prompting(models, resources, prompts, logs = True,):
     logger(logs)
-    print_time(f'\n-------------- Started searching for {len(queries)} diferent queries ----------------')
+    print_time(f'\n-------------- Started summarizing {len(models)} diferent models ----------------')
 
 
     if len(prompts) > 0:
-        headers_promps = ["Prompts"]
         for model in models:
             API.set_model(model)       
-            answers = [model]
-            for query in questions:
+            summaries = [model]
+            for model in models:
                 for prompt in prompts:
-                    print_time(f'{model} | Q: {query[:40]} | P: {prompt[:60]}')
-                    # ans = f'Question: {query}\nPrompt: {prompt}'
-                    ans = API.search(query, prompt)
-                    answers.append(ans)
+                    print_time(f'{model} P: {summaries[:40]}')
+                    # sum = f'model: {query}\nPrompt: {prompt}'
+                    sum = API.summarize(resources, prompt)   
+                    summaries.append(sum)
 
-            models_answers.append(answers)
+            models_summaries.append(summaries)
 
     else:   
         for model in models:
-            API.set_model(model)       
-            answers = [model]
-            for query in queries:
-                print_time(f'{model} Q: {query[:50]} ')
-                # ans = f'Question: {query}\nPrompt: {prompt}'
-                ans = API.search(query)
-                answers.append(ans)
+            API.set_model(model)   
+            summaries = [model]
+            for model in models:
+                print_time(f'{model} Sumary ')
+                sum = f'Model for sumary: {model}\nResources: {resources}'
+                sum = API.summarize(resources)   
+               
+                summaries.append(sum)
                 
-            models_answers.append(answers)
+            models_summaries.append(summaries)
 
-    return models_answers
+    return models_summaries
 
 
-def export_to_csv(models_answers):
-    with open('model_tester.csv', 'w', newline='') as file:
-        print_time(f'\n-------------- Started writing process for {len(models_answers)} models ----------------')
+def export_to_csv(models_summaries):
+    with open('Summmary.csv', 'w', newline='') as file:
+        print_time(f'\n-------------- Started writing process for {len(models_summaries)} models ----------------')
         writer = csv.writer(file)
         
-        for answer_row in models_answers:
+        for answer_row in models_summaries:
             print_time(f'Writing {answer_row[0]} row')
             writer.writerow(answer_row)
     
 
 # ----------------------------
 
-
-# models_answers = run_search_for_all_models(questions, [], False)
-# print(search("what is a vector database"))
-models_answers = run_search_for_all_models(questions, prompts)
-export_to_csv(models_answers)
+run_summarize_with_prompting(models, resources, prompts)
+export_to_csv(models_summaries)
 
 # -------------------- exploring prompting
 

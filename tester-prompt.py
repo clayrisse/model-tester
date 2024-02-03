@@ -15,6 +15,7 @@ def print_time(line):
         current_time = now.strftime("%H:%M:%S")
         print(f'.{current_time} | {line}')
 
+
 questions = [
             # "What is a vector", 
             # "What is and emmbeding",
@@ -23,7 +24,7 @@ questions = [
             # "What about a prince",
             "Who is bella",
             # "What is a vector database in 200 characters",
-            "What is a vector databas?"
+            "What is a vector database?"
             ]
 
 models =    [
@@ -35,9 +36,9 @@ models =    [
             ]
 
 prompts =   [
-            # "Give a detailed answer to this question in a list format. ",
+            "Give a detailed answer to this question in a list format. "
             # "Answer this question always in French",
-            # "Answer in bulletpoints"
+            # "Answer in bulletpoints",
             # "Give a detailed answer to this \{question\} in a list format.  If you do not find an answer in this context: \{context\}, say that you don't have enough data.",
             # "Answer this \{question\} in a concise way",
             # "Answer this \{question\} always in French"
@@ -46,12 +47,11 @@ prompts =   [
 
 headers = ["Questions"]
 if len(prompts) > 0:
-    headers_promps = ["Prompts"]
+    head_query_prompt = ["Query/Prompt"]
     for question in questions:
         for prompt in prompts:
-            headers.append(question)
-            headers_promps.append(prompt)
-    models_answers = [headers , headers_promps]
+            head_query_prompt.append(f'Q:{question}\n\nP:{prompt}')
+    models_answers = [head_query_prompt]
 else:    
     headers.extend(questions)
     models_answers = [headers]
@@ -64,7 +64,6 @@ def run_search_for_all_models(queries, prompts = [], logs = True, ):
 
 
     if len(prompts) > 0:
-        headers_promps = ["Prompts"]
         for model in models:
             API.set_model(model)       
             answers = [model]
@@ -93,7 +92,7 @@ def run_search_for_all_models(queries, prompts = [], logs = True, ):
 
 
 def export_to_csv(models_answers):
-    with open('model_tester.csv', 'w', newline='') as file:
+    with open('Prompt.csv', 'w', newline='') as file:
         print_time(f'\n-------------- Started writing process for {len(models_answers)} models ----------------')
         writer = csv.writer(file)
         
@@ -107,6 +106,7 @@ def export_to_csv(models_answers):
 
 # models_answers = run_search_for_all_models(questions, [], False)
 # print(search("what is a vector database"))
+            
 models_answers = run_search_for_all_models(questions, prompts)
 export_to_csv(models_answers)
 

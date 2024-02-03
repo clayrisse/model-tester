@@ -78,14 +78,14 @@ class API:
         assert response.status_code == 200
         return response.json()["answer"]
 
-    def summarize(prompt = ""):
+    def summarize(resources=["4df19a1be2a28f11dca2910fa60b3e00"], prompt = ""):
         print_time(f'summarizing...')
         url = f'{NUCLIA_KB_API}/kb/{os.getenv("KB_ID")}/summarize'
         response = requests.post(
             url, 
             json={
-                "resources": ["4df19a1be2a28f11dca2910fa60b3e00"]
-                # "user_prompt": "answer in french",
+                "resources": resources,
+                "user_prompt": prompt
             },
             headers={
                 "Authorization": f'Bearer {os.getenv("GLOBAL_AUTH_TOKEN")}',
@@ -95,7 +95,7 @@ class API:
         # print(response.json())
         assert response.status_code == 200
         print_time(f'summarized......')
-        # return response.json()["answer"]
+        return response.json()["summary"]
 
 
 
