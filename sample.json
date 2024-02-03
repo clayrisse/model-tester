@@ -1,9 +1,0 @@
-{
-    "resources": {
-        "4df19a1be2a28f11dca2910fa60b3e00": {
-            "summary": "The document provides an overview of vector databases, which are specialized databases designed to handle vector embeddings used in AI applications. It explains the challenges of working with vector embeddings and the limitations of traditional scalar-based databases and standalone vector indices. The document discusses the working of vector databases, algorithms used, similarity measures, filtering, database operations, access control, backups, and API/SDKs. It emphasizes the advantages of vector databases in managing vector embeddings in production scenarios and highlights the role of Pinecone in simplifying the complexities associated with vector databases.",
-            "tokens": 5078
-        }
-    },
-    "summary": "The document provides an overview of vector databases, which are specialized databases designed to handle vector embeddings used in AI applications. It explains the challenges of working with vector embeddings and the limitations of traditional scalar-based databases and standalone vector indices. The document discusses the working of vector databases, algorithms used, similarity measures, filtering, database operations, access control, backups, and API/SDKs. It emphasizes the advantages of vector databases in managing vector embeddings in production scenarios and highlights the role of Pinecone in simplifying the complexities associated with vector databases."
-}

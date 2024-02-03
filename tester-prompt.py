@@ -1,20 +1,10 @@
 from datetime import datetime
-from enum import Enum
-import requests
 import csv
-import os
-from dotenv import load_dotenv
+from models import API
 
+# Remember to set KB_ID, KB_URL, API_KEY and GLOBAL_AUTH_TOKEN keys in your .env file
 
-def load_keys():
-    print("Loading enviorment keys...")
-    load_dotenv()
-
-load_keys()
-
-NUCLIA_MANAGEMENT_API = "https://nuclia.cloud/api/v1"
-NUCLIA_KB_API = "https://europe-1.nuclia.cloud/api/v1"
-
+show_log = True
 def logger(logger = True):
     global show_log
     show_log = logger
@@ -25,101 +15,79 @@ def print_time(line):
         current_time = now.strftime("%H:%M:%S")
         print(f'.{current_time} | {line}')
 
-
-class Model(Enum):
-    NO_GENERATION_MODE = "generative-multilingual-2023"
-    Chat_GPT_3 = "chatgpt-azure-3"
-    Chat_GPT_4 = "chatgpt-azure"
-    ANTHROPIC_CLAUDE = "anthropic"
-    GOOGLE_GEMINI_PRO = "gemini-pro"
-
-
-def get_model():
-    url = f"{NUCLIA_KB_API}/kb/{os.getenv('KB_ID')}/configuration"
-    response = requests.get(
-        url,headers={"Authorization": f"Bearer {os.getenv('GLOBAL_AUTH_TOKEN')}"}
-    )
-    assert response.status_code == 200
-    return response.json()['generative_model']
-
-def set_model(model: Model):
-    current_model= get_model()
-    url = f"{NUCLIA_KB_API}/kb/{os.getenv('KB_ID')}/configuration"
-    response = requests.patch(
-        url, 
-        json={
-            "generative_model": model
-        },
-        headers={"Authorization": f"Bearer {os.getenv('GLOBAL_AUTH_TOKEN')}"}
-    )
-    assert response.status_code == 204
-    print_time(f'| | | | | | | | | | Generative model PATCHed from {current_model} ---> {model}')
-
-def search(query, prompt = ""):
-    url = f"{NUCLIA_KB_API}/kb/{os.getenv('KB_ID')}/chat"
-    response = requests.post(
-        url, 
-        json={
-            "query": query, 
-            "prompt": prompt
-        },
-        headers={
-            "Authorization": f"Bearer {os.getenv('GLOBAL_AUTH_TOKEN')}",
-            "x-synchronous": "true"
-            }
-    )
-
-    assert response.status_code == 200
-    print_time(f'answering...')
-    return response.json()["answer"]
-   
-
 questions = [
-            "What is a vector", 
-            "Who is Eudald", 
-            "What is a vector database in a shakespearean tone",
-            "What about a prince",
+            # "What is a vector", 
+            # "What is and emmbeding",
+            # "Who is Eudald", 
+            # "What is a vector database in a shakespearean tone",
+            # "What about a prince",
             "Who is bella",
-            "What is a vector database in 200 characters",
-            "What is a vector databasein 2 paragraphs"
-          ]
+            # "What is a vector database in 200 characters",
+            "What is a vector databas?"
+            ]
 
-models = [
-        #   "generative-multilingual-2023",
-          "chatgpt-azure-3",
-          "chatgpt-azure",
-          "anthropic",
-          "gemini-pro"
-          ]
+models =    [
+            # "generative-multilingual-2023",
+            # "chatgpt-azure-3",
+            "chatgpt-azure",
+            # "gemini-pro",
+            "anthropic"
+            ]
 
-# models2 = [
-#             "NO_GENERATION_MODE",
-#             "Chat_GPT_3",
-#             "Chat_GPT_4",
-#             "ANTHROPIC_CLAUDE",
-#             "GOOGLE_GEMINI_PRO"
-#           ]
-
-
-headers = ["Models"]
-headers.extend(questions)
-models_answers = [headers]
+prompts =   [
+            # "Give a detailed answer to this question in a list format. ",
+            # "Answer this question always in French",
+            # "Answer in bulletpoints"
+            # "Give a detailed answer to this \{question\} in a list format.  If you do not find an answer in this context: \{context\}, say that you don't have enough data.",
+            # "Answer this \{question\} in a concise way",
+            # "Answer this \{question\} always in French"
+            ]
 
 
-def run_search_for_all_models(queries, prompt = "", logs = True, ):
+headers = ["Questions"]
+if len(prompts) > 0:
+    headers_promps = ["Prompts"]
+    for question in questions:
+        for prompt in prompts:
+            headers.append(question)
+            headers_promps.append(prompt)
+    models_answers = [headers , headers_promps]
+else:    
+    headers.extend(questions)
+    models_answers = [headers]
+
+
+
+def run_search_for_all_models(queries, prompts = [], logs = True, ):
     logger(logs)
     print_time(f'\n-------------- Started searching for {len(queries)} diferent queries ----------------')
 
-    for model in models:
-        set_model(model)       
-        answers = [model]
-        for query in queries:
-            print_time(f'{model} Q: {query}')
-            # ans = f'Question: {q}'
-            ans = search(query, prompt)
-            answers.append(ans)
-            
-        models_answers.append(answers)
+
+    if len(prompts) > 0:
+        headers_promps = ["Prompts"]
+        for model in models:
+            API.set_model(model)       
+            answers = [model]
+            for query in questions:
+                for prompt in prompts:
+                    print_time(f'{model} | Q: {query[:40]} | P: {prompt[:60]}')
+                    # ans = f'Question: {query}\nPrompt: {prompt}'
+                    ans = API.search(query, prompt)
+                    answers.append(ans)
+
+            models_answers.append(answers)
+
+    else:   
+        for model in models:
+            API.set_model(model)       
+            answers = [model]
+            for query in queries:
+                print_time(f'{model} Q: {query[:50]} ')
+                # ans = f'Question: {query}\nPrompt: {prompt}'
+                ans = API.search(query)
+                answers.append(ans)
+                
+            models_answers.append(answers)
 
     return models_answers
 
@@ -136,8 +104,10 @@ def export_to_csv(models_answers):
 
 # ----------------------------
 
-# models_answers = run_search_for_all_models(questions, "", False)
-models_answers = run_search_for_all_models(questions)
+
+# models_answers = run_search_for_all_models(questions, [], False)
+# print(search("what is a vector database"))
+models_answers = run_search_for_all_models(questions, prompts)
 export_to_csv(models_answers)
 
 # -------------------- exploring prompting
