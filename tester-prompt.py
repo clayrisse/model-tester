@@ -17,28 +17,28 @@ def print_time(line):
 
 
 questions = [
-            # "What is a vector", 
-            # "What is and emmbeding",
-            # "Who is Eudald", 
+            "What is a vector database?",
+            "What is a vector", 
+            "What is and emmbeding",
+            "Who is Eudald",
             # "What is a vector database in a shakespearean tone",
             # "What about a prince",
-            "Who is bella",
+            # "Who is bella",
             # "What is a vector database in 200 characters",
-            "What is a vector database?"
             ]
 
 models =    [
             # "generative-multilingual-2023",
-            # "chatgpt-azure-3",
+            "chatgpt-azure-3",
             "chatgpt-azure",
-            # "gemini-pro",
+            "gemini-pro",
             "anthropic"
             ]
 
 prompts =   [
             "Give a detailed answer to this question in a list format. "
-            # "Answer this question always in French",
-            # "Answer in bulletpoints",
+            "Answer this question always in French",
+            "Answer in bulletpoints"
             # "Give a detailed answer to this \{question\} in a list format.  If you do not find an answer in this context: \{context\}, say that you don't have enough data.",
             # "Answer this \{question\} in a concise way",
             # "Answer this \{question\} always in French"
@@ -92,7 +92,8 @@ def run_search_for_all_models(queries, prompts = [], logs = True, ):
 
 
 def export_to_csv(models_answers):
-    with open('Prompt.csv', 'w', newline='') as file:
+    # with open('Table_Models_No_Prompt.csv', 'w', newline='') as file:
+    with open('Table_Models_With_Prompt.csv', 'w', newline='') as file:
         print_time(f'\n-------------- Started writing process for {len(models_answers)} models ----------------')
         writer = csv.writer(file)
         
@@ -105,7 +106,7 @@ def export_to_csv(models_answers):
 
 
 # models_answers = run_search_for_all_models(questions, [], False)
-# print(search("what is a vector database"))
+# models_answers = run_search_for_all_models(questions, [])
             
 models_answers = run_search_for_all_models(questions, prompts)
 export_to_csv(models_answers)

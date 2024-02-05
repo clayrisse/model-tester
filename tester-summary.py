@@ -18,19 +18,16 @@ def print_time(line):
 
 models =    [
             # "generative-multilingual-2023",
-            # "chatgpt-azure-3",
+            "chatgpt-azure-3",
             "chatgpt-azure",
-            # "gemini-pro",
             "anthropic"
             ]
 
 prompts =   [
-            "Give a detailed answer to this question in a list format. "
-            # "Answer this question always in French.",
-            # "Answer in bulletpoints"
-            # "Give a detailed answer to this \{question\} in a list format.  If you do not find an answer in this context: \{context\}, say that you don't have enough data.",
-            # "Answer this \{question\} in a concise way",
-            # "Answer this \{question\} always in French"
+            "Make a bullet point summary of the following content: text",
+            "Make a thorough summary of the following news article: text"
+            # "Make a bullet point summary of the following content: \{text\}",
+            # "Make a thorough summary of the following news article: \{text\}"
             ]
 
 resources = [
@@ -87,7 +84,8 @@ def run_summarize_with_prompting(models, resources, prompts, logs = True,):
 
 
 def export_to_csv(models_summaries):
-    with open('Summmary.csv', 'w', newline='') as file:
+    with open('Table_Summary_With_Prompt.csv', 'w', newline='') as file:
+    # with open('Table_Summary_No_Prompt.csv', 'w', newline='') as file:
         print_time(f'\n-------------- Started writing process for {len(models_summaries)} models ----------------')
         writer = csv.writer(file)
         
@@ -99,6 +97,7 @@ def export_to_csv(models_summaries):
 # ----------------------------
 
 run_summarize_with_prompting(models, resources, prompts)
+# run_summarize_with_prompting(models, resources, [])
 export_to_csv(models_summaries)
 
 # -------------------- exploring prompting

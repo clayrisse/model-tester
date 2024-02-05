@@ -1,6 +1,6 @@
 .env
-Prompt.csv
-Summmary.csv
+# Prompt.csv
+# Summary.csv
 
 .DS_Store
 sample.json
